@@ -12,7 +12,7 @@ from ppt_generator.build_ppt import generate_ppt
 
 
 st.set_page_config(
-    page_title="Survey PPT Generator",
+    page_title="Executive Summary to Development Action Builder",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -65,6 +65,7 @@ st.markdown("""
 .helper-text {
     color: #666666;
     font-size: 14px;
+    line-height: 1.7;
 }
 
 .stButton > button {
@@ -103,10 +104,6 @@ st.markdown("""
     font-weight: 700;
     color: #111111;
     margin-top: 4px;
-}
-
-.small-gap {
-    height: 6px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -158,19 +155,19 @@ def metrics_to_dataframe(metrics):
 
 st.markdown("""
 <div class="top-banner">
-    <h1>Survey PPT Generator</h1>
-    <p>Transforming engagement survey findings into structured organizational development actions.</p>
+    <h1>Executive Summary to Development Action Builder</h1>
+    <p>Convert engagement survey executive summary results into a structured Development Action presentation.</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="section-title">User Guide</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Process Overview</div>', unsafe_allow_html=True)
 st.markdown("""
 <div class="white-card">
     <div class="helper-text">
-        1. Upload your survey source file (PPT A)<br>
-        2. Optional: upload a different template PPT B<br>
-        3. Click <b>Generate PPT</b><br>
-        4. Review and download the generated result
+        1. Upload the <b>Executive Summary Report</b> PPT<br>
+        2. The tool extracts key engagement findings, strengths, opportunities, and priority themes<br>
+        3. The system maps these findings into a standardized <b>Development Action</b> presentation structure<br>
+        4. Review the output and download the generated PPT
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -181,33 +178,33 @@ col_upload1, col_upload2 = st.columns(2)
 
 with col_upload1:
     st.markdown('<div class="white-card">', unsafe_allow_html=True)
-    uploaded_a = st.file_uploader("Upload PPT A", type=["pptx"])
+    uploaded_a = st.file_uploader("Upload Executive Summary Report", type=["pptx"])
     st.markdown(
-        '<div class="helper-text">Required. This is the survey result PPT.</div>',
+        '<div class="helper-text">Required. Upload the Executive Summary Report as the source input.</div>',
         unsafe_allow_html=True,
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_upload2:
     st.markdown('<div class="white-card">', unsafe_allow_html=True)
-    uploaded_template = st.file_uploader("Optional: upload template PPT B", type=["pptx"])
+    uploaded_template = st.file_uploader("Optional: upload Development Action template", type=["pptx"])
     st.markdown(
-        '<div class="helper-text">Optional. If empty, the built-in template will be used.</div>',
+        '<div class="helper-text">Optional. If empty, the built-in Development Action template will be used.</div>',
         unsafe_allow_html=True,
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-generate_btn = st.button("Generate PPT")
+generate_btn = st.button("Generate Development Action PPT")
 
 if generate_btn:
     if uploaded_a is None:
-        st.error("Please upload PPT A first.")
+        st.error("Please upload the Executive Summary Report first.")
         st.stop()
 
     repo_template = Path("templates/base_template.pptx")
 
     if uploaded_template is None and not repo_template.exists():
-        st.error("Template file not found. Please upload template B or add templates/base_template.pptx.")
+        st.error("Template file not found. Please upload a Development Action template or add templates/base_template.pptx.")
         st.stop()
 
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -223,7 +220,7 @@ if generate_btn:
             template_path = repo_template
 
         try:
-            with st.spinner("Parsing survey PPT and generating output..."):
+            with st.spinner("Extracting findings and building the Development Action presentation..."):
                 parsed = parse_survey_ppt(str(a_path))
 
                 metrics = parsed["metrics"]
@@ -247,7 +244,7 @@ if generate_btn:
                 output_path = tmp_dir / f"generated_output_{uuid.uuid4().hex}.pptx"
                 generate_ppt(str(template_path), str(output_path), report_data)
 
-            st.success("PPT generated successfully.")
+            st.success("Development Action PPT generated successfully.")
 
             overview = report_data["overview"]
 
@@ -282,7 +279,7 @@ if generate_btn:
             left, right = st.columns([1, 1])
 
             with left:
-                st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-title">Executive Summary Overview</div>', unsafe_allow_html=True)
                 st.markdown('<div class="white-card">', unsafe_allow_html=True)
                 st.json(report_data["overview"])
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -296,7 +293,7 @@ if generate_btn:
             c1, c2 = st.columns(2)
 
             with c1:
-                st.markdown('<div class="section-title">Detected Strengths</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-title">Key Strengths</div>', unsafe_allow_html=True)
                 st.markdown('<div class="white-card">', unsafe_allow_html=True)
                 if strengths:
                     for x in strengths:
@@ -306,7 +303,7 @@ if generate_btn:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             with c2:
-                st.markdown('<div class="section-title">Detected Opportunities</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-title">Priority Opportunities</div>', unsafe_allow_html=True)
                 st.markdown('<div class="white-card">', unsafe_allow_html=True)
                 if opportunities:
                     for x in opportunities:
@@ -315,7 +312,7 @@ if generate_btn:
                     st.write("No opportunities detected.")
                 st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown('<div class="section-title">Action Themes</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Recommended Development Actions</div>', unsafe_allow_html=True)
             st.markdown('<div class="white-card">', unsafe_allow_html=True)
             for a in actions:
                 st.markdown(f"**{a['theme']}**")
@@ -324,9 +321,9 @@ if generate_btn:
             st.markdown('</div>', unsafe_allow_html=True)
 
             st.download_button(
-                label="Download Final PPT",
+                label="Download Development Action PPT",
                 data=output_path.read_bytes(),
-                file_name="generated_survey_followup.pptx",
+                file_name="development_action_output.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
             )
 
@@ -335,4 +332,4 @@ if generate_btn:
             st.exception(e)
 
 st.markdown("---")
-st.caption("Internal productivity tool | Survey PPT automation")
+st.caption("Internal productivity tool | Executive Summary to Development Action automation")
