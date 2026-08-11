@@ -146,7 +146,6 @@ def _add_content_panel(slide, left, top, width, height, heading, bullets, headin
 
 
 def _add_two_column_panels(slide, left_heading, left_bullets, right_heading, right_bullets):
-    # Reuse the visual area previously occupied by template pictures
     top = 1.75
     height = 3.3
     _add_content_panel(
@@ -158,14 +157,6 @@ def _add_two_column_panels(slide, left_heading, left_bullets, right_heading, rig
         slide,
         Inches(5.15), Inches(top), Inches(4.75), Inches(height),
         right_heading, right_bullets, ABB_LILAC
-    )
-
-
-def _add_single_wide_panel(slide, heading, bullets):
-    _add_content_panel(
-        slide,
-        Inches(0.35), Inches(1.55), Inches(9.55), Inches(4.55),
-        heading, bullets, ABB_RED
     )
 
 
@@ -189,30 +180,53 @@ def generate_ppt(template_path, output_path, data):
         _safe_title(slide, "Development Actions – Follow up in 2026")
         _safe_subtitle(slide, f"Based on Engagement Survey results, {team_name}")
 
-    # Slide 2 - overview
+    # Slide 2 - Executive Summary Overview
     if len(prs.slides) >= 2:
         slide = prs.slides[1]
-        _safe_title(slide, "Team Overview")
+        _safe_title(slide, "Executive Summary Overview")
         _remove_pictures_on_slide(slide)
+
+        left_bullets = _overview_bullets(overview)
+
+        priority_themes = []
+        for x in opportunities[:3]:
+            priority_themes.append(f"{x['name']} — {x['score']}")
+
+        if not priority_themes:
+            priority_themes = ["No priority theme detected."]
+
         _add_two_column_panels(
             slide,
             "Survey Snapshot",
-            _overview_bullets(overview),
-            "Key Messages",
-            key_messages,
+            left_bullets,
+            "Priority Themes",
+            priority_themes,
         )
 
-    # Slide 3 - strengths and opportunities
+    # Slide 3 - Strengths and Opportunities vs Company
     if len(prs.slides) >= 3:
         slide = prs.slides[2]
-        _safe_title(slide, "Strengths and Opportunities")
+        _safe_title(slide, "Strengths and Opportunities vs Company")
         _remove_pictures_on_slide(slide)
+
+        left_bullets = _metric_lines(strengths, 5)
+        right_bullets = _metric_lines(opportunities, 5)
+
+        if overview.get("engagement_score") is not None and overview.get("company_score") is not None:
+            gap = overview["engagement_score"] - overview["company_score"]
+            if gap > 0:
+                right_bullets.append(f"Overall engagement is above company benchmark by {gap} points.")
+            elif gap < 0:
+                right_bullets.append(f"Overall engagement is below company benchmark by {abs(gap)} points.")
+            else:
+                right_bullets.append("Overall engagement is in line with company benchmark.")
+
         _add_two_column_panels(
             slide,
             "Top Strengths",
-            _metric_lines(strengths, 5),
+            left_bullets,
             "Top Opportunities",
-            _metric_lines(opportunities, 5),
+            right_bullets,
         )
 
     # Slide 4 - bottom 10
