@@ -3,3 +3,4 @@ python-pptx
 pandas
 openpyxl
 lxml
+plotnine
