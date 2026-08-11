@@ -227,19 +227,21 @@ if generate_btn:
                 strengths, opportunities, bottom10, top3, bottom3 = classify_metrics(metrics)
                 actions = generate_actions(opportunities, bottom3)
 
-                report_data = {
-                    "overview": parsed["overview"],
-                    "metrics": metrics,
-                    "strengths": strengths,
-                    "opportunities": opportunities,
-                    "bottom10": bottom10,
-                    "top3": top3,
-                    "bottom3": bottom3,
-                    "actions": actions,
-                    "key_messages": build_key_messages(
-                        parsed["overview"], strengths, opportunities, bottom3
-                    ),
-                }
+report_data = {
+    "overview": parsed["overview"],
+    "metrics": metrics,
+    "strengths": strengths,
+    "opportunities": opportunities,
+    "bottom10": bottom10,
+    "top3": top3,
+    "bottom3": bottom3,
+    "actions": actions,
+    "priority_themes": parsed.get("priority_themes", []),
+    "key_messages": build_key_messages(
+        parsed["overview"], strengths, opportunities, bottom3
+    ),
+}
+
 
                 output_path = tmp_dir / f"generated_output_{uuid.uuid4().hex}.pptx"
                 generate_ppt(str(template_path), str(output_path), report_data)
