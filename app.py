@@ -159,7 +159,7 @@ def metrics_to_dataframe(metrics):
 st.markdown("""
 <div class="top-banner">
     <h1>Survey PPT Generator</h1>
-    <p>Upload survey PPT A and generate a formal follow-up PPT based on your fixed template.</p>
+    <p>Transforming engagement survey findings into structured organizational development actions.</p>
 </div>
 """, unsafe_allow_html=True)
 
