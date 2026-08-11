@@ -85,6 +85,25 @@ def _overview_bullets(overview):
     return bullets
 
 
+def _build_slide2_right_bullets(key_messages, priority_themes, opportunities):
+    bullets = []
+
+    if key_messages:
+        bullets.extend(key_messages[:4])
+
+    themes = priority_themes or [x["name"] for x in opportunities[:3]]
+
+    if themes:
+        bullets.append("Priority themes:")
+        for t in themes[:3]:
+            bullets.append(f"{t}")
+
+    if not bullets:
+        bullets = ["No key message detected."]
+
+    return bullets
+
+
 def _replace_if_possible(slide, shape_idx, heading, bullets):
     if shape_idx < len(slide.shapes):
         shape = slide.shapes[shape_idx]
@@ -103,20 +122,12 @@ def _remove_shape(shape):
 
 
 def _remove_pictures_on_slide(slide):
-    """
-    Remove picture objects on a slide.
-    This is used on template content slides where the original
-    content is stored as screenshots/images.
-    """
     pictures = [shape for shape in slide.shapes if shape.shape_type == 13]
     for shape in pictures:
         _remove_shape(shape)
 
 
 def _add_content_panel(slide, left, top, width, height, heading, bullets, heading_color=ABB_RED):
-    """
-    Create a white content panel and place text inside it.
-    """
     rect = slide.shapes.add_shape(
         MSO_AUTO_SHAPE_TYPE.ROUNDED_RECTANGLE, left, top, width, height
     )
@@ -172,6 +183,7 @@ def generate_ppt(template_path, output_path, data):
     bottom3 = data["bottom3"]
     actions = data["actions"]
     key_messages = data["key_messages"]
+    priority_themes = data.get("priority_themes", [])
 
     # Slide 1 - cover
     if len(prs.slides) >= 1:
@@ -187,20 +199,16 @@ def generate_ppt(template_path, output_path, data):
         _remove_pictures_on_slide(slide)
 
         left_bullets = _overview_bullets(overview)
-
-        priority_themes = []
-        for x in opportunities[:3]:
-            priority_themes.append(f"{x['name']} — {x['score']}")
-
-        if not priority_themes:
-            priority_themes = ["No priority theme detected."]
+        right_bullets = _build_slide2_right_bullets(
+            key_messages, priority_themes, opportunities
+        )
 
         _add_two_column_panels(
             slide,
             "Survey Snapshot",
             left_bullets,
-            "Priority Themes",
-            priority_themes,
+            "Key Messages and Priority Themes",
+            right_bullets,
         )
 
     # Slide 3 - Strengths and Opportunities vs Company
